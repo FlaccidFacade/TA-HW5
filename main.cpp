@@ -61,42 +61,36 @@ int main()
     bind(server_fd, (struct sockaddr *)&address, sizeof(address));
 
     // prepare for connections on socket
-    listen(server_fd, 3);
+    listen(server_fd, 10);
 
-    
     while(true){
-       
-        // wait for connection and open a new socket when it arrives
-        new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
-
-        if(thread_ct < 2){
+        while(thread_ct < thread_pool){
+        
+            // wait for connection and open a new socket when it arrives
+            new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
+        
+        
             //create new thread using lambda expresion
             threads.push_back(
-                thread([&new_socket, &content, &err] {
+                thread([new_socket, &content, &err] {
                     //block of code to act as a wait function
                     unsigned long temp = 0;
-                    for(unsigned long i = 0; i < 1709551610; i++){
+                    for(unsigned long i = 0; i < 2709551610; i++){
                         temp = temp + 1;
                     }
-            
-                
                     send(new_socket , content , strlen(content) , 0 );
                 })
             );
             thread_ct++;
-        }else{
-            send(new_socket , err , strlen(err) , 0 );
         }
-
+        
         for (std::thread &t : threads) {
             if (t.joinable()) {
                 t.join();
                 thread_ct--;
             }
         }
-
     }
-
 
 
 	return 0;
